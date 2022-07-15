@@ -58,6 +58,8 @@ class NTRIPClient:
     self._port = port
     self._mountpoint = mountpoint
     self._ntrip_version = ntrip_version
+    self._username = username
+    self._password = password
     if username is not None and password is not None:
       self._basic_credentials = base64.b64encode('{}:{}'.format(
         username, password).encode('utf-8')).decode('utf-8')

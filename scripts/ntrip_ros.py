@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -11,6 +11,10 @@ from nmea_msgs.msg import Sentence
 
 from ntrip_client.ntrip_client import NTRIPClient
 from ntrip_client.srv import NtripClientConnect, NtripClientConnectResponse
+
+# If no RTCM received for `kKeepAlivePeriod` seconds, connection will be re-opened
+kKeepAlivePeriod = 5.0
+kAttemptReconnectTimeout = 3.0
 
 class NTRIPRos:
   def __init__(self):
@@ -61,6 +65,10 @@ class NTRIPRos:
 
     # Initialize the client
     self.init_client(host, port, mountpoint, ntrip_version, username, password)
+
+    # Keep-alive purposes
+    self._last_rtcm_time = rospy.Time.now()
+    self._last_reconnect_attempt_time = self._last_rtcm_time
 
   def init_client(self, host, port, mountpoint, ntrip_version, username, password):
     self._client = NTRIPClient(
@@ -119,7 +127,36 @@ class NTRIPRos:
     self._client.send_nmea(nmea.sentence)
 
   def publish_rtcm(self, event):
-    for raw_rtcm in self._client.recv_rtcm():
+    # Do not try to get RTCM if not connected
+    if not self._client._connected:
+      raw_rtcms = []
+    else:
+      raw_rtcms = self._client.recv_rtcm()
+
+    curr_time = rospy.Time.now()
+    if len(raw_rtcms) > 0:
+      self._last_rtcm_time = curr_time
+    if curr_time - self._last_rtcm_time > rospy.Duration(kKeepAlivePeriod):
+      if curr_time - self._last_reconnect_attempt_time > rospy.Duration(kAttemptReconnectTimeout):
+        try:
+          self._last_reconnect_attempt_time = curr_time
+          # Reconnect with original client connection info
+          rospy.loginfo("Attempting to reconnect to NTRIP server")
+          self._client.disconnect()
+          self.init_client(
+            self._client._host,
+            self._client._port,
+            self._client._mountpoint,
+            self._client._ntrip_version,
+            self._client._username,
+            self._client._password
+          )
+          if self._client.connect():
+            rospy.loginfo("Reconnected to NTRIP server")
+        except Exception as e:
+          rospy.logerr("Exception while reconnecting: " + str(e))
+          return
+    for raw_rtcm in raw_rtcms:
       self._rtcm_pub.publish(RTCM(
         header=Header(
           stamp=rospy.Time.now(),
