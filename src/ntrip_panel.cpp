@@ -23,6 +23,7 @@ static const QString kUsernameText = QStringLiteral("Username: ");
 static const QString kPasswordText = QStringLiteral("Password: ");
 static const QString kNtripVersionText = QStringLiteral("Ntrip Version: ");
 static const QString kConnectText = QStringLiteral("Connect");
+static const QString kDisconnectText = QStringLiteral("Disconnect");
 
 namespace ntrip_client
 {
@@ -38,6 +39,7 @@ NtripPanel::NtripPanel(QWidget* parent)
     m_password_textfield = new QLineEdit(this);
     m_ntrip_version_textfield = new QLineEdit(this);
     m_connect_button = new QPushButton(kConnectText, this);
+    m_disconnect_button = new QPushButton(kDisconnectText, this);
 
     QHBoxLayout* host_layout = new QHBoxLayout;
     host_layout->addWidget(new QLabel(kHostText, this));
@@ -63,6 +65,10 @@ NtripPanel::NtripPanel(QWidget* parent)
     ntrip_version_layout->addWidget(new QLabel(kNtripVersionText, this));
     ntrip_version_layout->addWidget(m_ntrip_version_textfield);
 
+    QHBoxLayout* buttons_layout = new QHBoxLayout;
+    buttons_layout->addWidget(m_connect_button);
+    buttons_layout->addWidget(m_disconnect_button);
+
     QVBoxLayout* layout = new QVBoxLayout;
     layout->addLayout(host_layout);
     layout->addLayout(port_layout);
@@ -70,7 +76,7 @@ NtripPanel::NtripPanel(QWidget* parent)
     layout->addLayout(username_layout);
     layout->addLayout(password_layout);
     layout->addLayout(ntrip_version_layout);
-    layout->addWidget(m_connect_button);
+    layout->addLayout(buttons_layout);
 
     setLayout(layout);
 
@@ -78,6 +84,7 @@ NtripPanel::NtripPanel(QWidget* parent)
     m_connect_service_client = m_nh.serviceClient<ntrip_client::NtripClientConnect>("/ntrip_client_connect");
 
     connect(m_connect_button, SIGNAL(clicked()), this, SLOT(connect_clicked()));
+    connect(m_disconnect_button, SIGNAL(clicked()), this, SLOT(disconnect_clicked()));
 }
 
 NtripPanel::~NtripPanel()
@@ -111,6 +118,7 @@ void NtripPanel::load(const rviz::Config& config)
 void NtripPanel::connect_clicked()
 {
     ntrip_client::NtripClientConnect srv;
+    srv.request.is_connect = true;
     srv.request.authenticate = true;
     srv.request.host = m_host_textfield->text().toStdString();
     srv.request.port = m_port_textfield->text().toStdString();
@@ -127,6 +135,20 @@ void NtripPanel::connect_clicked()
         ROS_ERROR("Failed to call service NtripClientConnect");
     }
     return;
+}
+
+void NtripPanel::disconnect_clicked()
+{
+    ntrip_client::NtripClientConnect srv;
+    srv.request.is_connect = false;
+    if (m_connect_service_client.call(srv))
+    {
+        ROS_INFO("NtripClientConnect: %s", srv.response.success ? "success" : "failure");
+    }
+    else
+    {
+        ROS_ERROR("Failed to call service NtripClientConnect");
+    }
 }
 
 } // namespace ntrip_client

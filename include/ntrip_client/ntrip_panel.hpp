@@ -38,6 +38,7 @@ Q_SIGNALS:
 protected Q_SLOTS:
     // ui
     void connect_clicked();
+    void disconnect_clicked();
 
 protected:
     QLineEdit* m_host_textfield;
@@ -47,6 +48,7 @@ protected:
     QLineEdit* m_password_textfield;
     QLineEdit* m_ntrip_version_textfield;
     QPushButton* m_connect_button;
+    QPushButton* m_disconnect_button;
 
     ros::NodeHandle m_nh;
     ros::ServiceClient m_connect_service_client;

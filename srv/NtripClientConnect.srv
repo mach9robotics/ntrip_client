@@ -1,3 +1,4 @@
+bool is_connect
 string host
 string port
 string mountpoint
