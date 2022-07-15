@@ -25,6 +25,7 @@ catkin_package(
     rospy
     std_msgs
     mavros_msgs
+    rtcm_msgs
     nmea_msgs
 )
 

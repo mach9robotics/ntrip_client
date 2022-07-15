@@ -1,0 +1,30 @@
+<?xml version="1.1"?>
+<launch>
+  <arg name="host"                   default = "20.185.11.35" />
+  <arg name="port"                   default = "2101" />
+  <arg name="mountpoint"             default = "VTRI_RTCM3" />
+  <arg name="authenticate"           default = "true" />
+  <arg name="username"               default = "user" />
+  <arg name="password"               default = "pass" />
+  <arg name="ntrip_version"          default = "" />
+  <arg name="debug"                  default = "false" />
+
+  <include file="$(find ntrip_client)/launch/ntrip_client.launch">
+    <arg name="host"                 default = "$(arg host)" />
+    <arg name="port"                 default = "$(arg port)" />
+    <arg name="mountpoint"           default = "$(arg mountpoint)" />
+    <arg name="authenticate"         default = "$(arg authenticate)" />
+    <arg name="username"             default = "$(arg username)" />
+    <arg name="password"             default = "$(arg password)" />
+    <arg name="ntrip_version"        default = "$(arg ntrip_version)" />
+    <arg name="debug"                default = "$(arg debug)" />
+  </include>
+
+  <!-- ****************************************************************** -->
+  <!-- Translate from mavros_msgs::RTCM to rtcm_msgs::Message -->
+  <!-- ****************************************************************** -->
+  <node name="rtcm_conv_node" pkg="ntrip_client" type="rtcm_conv.py" output="screen" ns="ntrip_client">
+    <!-- input rtcm topic with type mavros_msgs::RTCM -->
+    <param name="rtcm_topic" value="rtcm" />
+  </node>
+</launch>
