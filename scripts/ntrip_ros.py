@@ -57,7 +57,7 @@ class NTRIPRos:
     self._rtcm_pub = rospy.Publisher('rtcm', RTCM, queue_size=10)
 
     # Setup connect request server
-    self._connect_server = rospy.Service("ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
+    self._connect_server = rospy.Service("/ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
 
     # Initialize the client
     self.init_client(host, port, mountpoint, ntrip_version, username, password)
@@ -97,21 +97,21 @@ class NTRIPRos:
     self._client.disconnect()
 
   def handle_connect_srv(self, req):
-    print("Handling connect service request")
     self.stop()
-    try:
-      self.init_client(
-        req.host,
-        int(req.port),
-        req.mountpoint,
-        req.ntrip_version,
-        req.username,
-        req.password
-      )
-      self.run()
-    except Exception as e:
-      rospy.logerr("Exception while connecting: " + str(e))
-      return False
+    if req.is_connect:
+      try:
+        self.init_client(
+          req.host,
+          int(req.port),
+          req.mountpoint,
+          req.ntrip_version,
+          req.username,
+          req.password
+        )
+        self.run()
+      except Exception as e:
+        rospy.logerr("Exception while connecting: " + str(e))
+        return NtripClientConnectResponse(False)
     return NtripClientConnectResponse(True)
 
   def subscribe_nmea(self, nmea):
