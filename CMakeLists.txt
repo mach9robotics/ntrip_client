@@ -9,6 +9,21 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   mavros_msgs
   nmea_msgs
+  message_generation
+)
+
+## Mark python modules for installation
+catkin_python_setup()
+
+## Add service files
+add_service_files(
+  FILES
+  NtripClientConnect.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+    std_msgs
 )
 
 ###################################
@@ -39,9 +54,6 @@ catkin_install_python(PROGRAMS
   scripts/ntrip_ros.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-## Mark python modules for installation
-catkin_python_setup()
 
 ## Install the launch files
 install(DIRECTORY launch/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)

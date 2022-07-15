@@ -1,0 +1,9 @@
+string host
+string port
+string mountpoint
+string username
+string password
+string ntrip_version
+bool authenticate
+---
+bool success

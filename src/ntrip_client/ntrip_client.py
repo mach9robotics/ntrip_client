@@ -30,16 +30,7 @@ class NTRIPClient:
     self._loginfo = loginfo
     self._logdebug = logdebug
 
-    # Save the server info
-    self._host = host
-    self._port = port
-    self._mountpoint = mountpoint
-    self._ntrip_version = ntrip_version
-    if username is not None and password is not None:
-      self._basic_credentials = base64.b64encode('{}:{}'.format(
-        username, password).encode('utf-8')).decode('utf-8')
-    else:
-      self._basic_credentials = None
+    self.set_conn_info(host, port, mountpoint, ntrip_version, username, password)
 
     # Create a socket object that we will use to connect to the server
     self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -60,6 +51,18 @@ class NTRIPClient:
 
     # Setup some state
     self._connected = False
+
+  def set_conn_info(self, host, port, mountpoint, ntrip_version, username, password):
+    # Save the server info
+    self._host = host
+    self._port = port
+    self._mountpoint = mountpoint
+    self._ntrip_version = ntrip_version
+    if username is not None and password is not None:
+      self._basic_credentials = base64.b64encode('{}:{}'.format(
+        username, password).encode('utf-8')).decode('utf-8')
+    else:
+      self._basic_credentials = None
 
   def connect(self):
     # Connect the socket to the server
