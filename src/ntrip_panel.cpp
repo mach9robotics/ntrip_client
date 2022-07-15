@@ -13,8 +13,11 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QTimer>
 
 #include "ntrip_client/ntrip_panel.hpp"
+#include "ntrip_client/NtripClientConnect.h"
+#include "ntrip_client/NtripClientStatus.h"
 
 static const QString kHostText = QStringLiteral("Host: ");
 static const QString kPortText = QStringLiteral("Port: ");
@@ -24,6 +27,10 @@ static const QString kPasswordText = QStringLiteral("Password: ");
 static const QString kNtripVersionText = QStringLiteral("Ntrip Version: ");
 static const QString kConnectText = QStringLiteral("Connect");
 static const QString kDisconnectText = QStringLiteral("Disconnect");
+
+static const QString kStatusInvalidText = QStringLiteral("Unknown");
+static const QString kStatusConnectedText = QStringLiteral("Connected");
+static const QString kStatusDisconnectedText = QStringLiteral("Disconnected");
 
 namespace ntrip_client
 {
@@ -40,6 +47,10 @@ NtripPanel::NtripPanel(QWidget* parent)
     m_ntrip_version_textfield = new QLineEdit(this);
     m_connect_button = new QPushButton(kConnectText, this);
     m_disconnect_button = new QPushButton(kDisconnectText, this);
+    m_status_label = new QLabel(this);
+    m_status_timer = new QTimer(this);
+
+    set_state(NtripClientState::INVALID);
 
     QHBoxLayout* host_layout = new QHBoxLayout;
     host_layout->addWidget(new QLabel(kHostText, this));
@@ -78,13 +89,19 @@ NtripPanel::NtripPanel(QWidget* parent)
     layout->addLayout(ntrip_version_layout);
     layout->addLayout(buttons_layout);
 
+    layout->addWidget(m_status_label);
+
     setLayout(layout);
 
     // setup service client
     m_connect_service_client = m_nh.serviceClient<ntrip_client::NtripClientConnect>("/ntrip_client_connect");
+    m_ntrip_status_client = m_nh.serviceClient<ntrip_client::NtripClientStatus>("/ntrip_client_status");
 
     connect(m_connect_button, SIGNAL(clicked()), this, SLOT(connect_clicked()));
     connect(m_disconnect_button, SIGNAL(clicked()), this, SLOT(disconnect_clicked()));
+    connect(m_status_timer, SIGNAL(timeout()), this, SLOT(update_ntrip_status()));
+
+    m_status_timer->start(1000);
 }
 
 NtripPanel::~NtripPanel()
@@ -127,11 +144,7 @@ void NtripPanel::connect_clicked()
     srv.request.username = m_username_textfield->text().toStdString();
     srv.request.password = m_password_textfield->text().toStdString();
     srv.request.ntrip_version = m_ntrip_version_textfield->text().toStdString();
-    if (m_connect_service_client.call(srv))
-    {
-        ROS_INFO("NtripClientConnect: %s", srv.response.success ? "success" : "failure");
-    }
-    else
+    if (!m_connect_service_client.call(srv))
     {
         ROS_ERROR("Failed to call service NtripClientConnect");
     }
@@ -142,13 +155,42 @@ void NtripPanel::disconnect_clicked()
 {
     ntrip_client::NtripClientConnect srv;
     srv.request.is_connect = false;
-    if (m_connect_service_client.call(srv))
+    if (!m_connect_service_client.call(srv))
     {
-        ROS_INFO("NtripClientConnect: %s", srv.response.success ? "success" : "failure");
+        ROS_ERROR("Failed to call service NtripClientConnect");
+    }
+}
+
+void NtripPanel::update_ntrip_status()
+{
+    ntrip_client::NtripClientStatus srv;
+    if (m_ntrip_status_client.call(srv))
+    {
+        set_state(srv.response.status == 0 ? NtripClientState::CONNECTED : NtripClientState::DISCONNECTED);
     }
     else
     {
-        ROS_ERROR("Failed to call service NtripClientConnect");
+        set_state(NtripClientState::INVALID);
+        ROS_ERROR_ONCE("Failed to call service NtripClientStatus");
+    }
+}
+
+void NtripPanel::set_state(NtripClientState state)
+{
+    switch (state)
+    {
+        case NtripClientState::INVALID:
+            m_status_label->setText(kStatusInvalidText);
+            m_status_label->setStyleSheet("QLabel { background-color : yellow; color : black; }");
+            break;
+        case NtripClientState::CONNECTED:
+            m_status_label->setText(kStatusConnectedText);
+            m_status_label->setStyleSheet("QLabel { background-color : green; color : white; }");
+            break;
+        case NtripClientState::DISCONNECTED:
+            m_status_label->setText(kStatusDisconnectedText);
+            m_status_label->setStyleSheet("QLabel { background-color : red; color : white; }");
+            break;
     }
 }
 

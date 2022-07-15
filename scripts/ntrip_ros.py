@@ -11,6 +11,7 @@ from nmea_msgs.msg import Sentence
 
 from ntrip_client.ntrip_client import NTRIPClient
 from ntrip_client.srv import NtripClientConnect, NtripClientConnectResponse
+from ntrip_client.srv import NtripClientStatus, NtripClientStatusResponse
 
 # If no RTCM received for `kKeepAlivePeriod` seconds, connection will be re-opened
 kKeepAlivePeriod = 5.0
@@ -62,6 +63,7 @@ class NTRIPRos:
 
     # Setup connect request server
     self._connect_server = rospy.Service("/ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
+    self._connect_server = rospy.Service("/ntrip_client_status", NtripClientStatus, self.handle_status_srv)
 
     # Initialize the client
     self.init_client(host, port, mountpoint, ntrip_version, username, password)
@@ -121,6 +123,11 @@ class NTRIPRos:
         rospy.logerr("Exception while connecting: " + str(e))
         return NtripClientConnectResponse(False)
     return NtripClientConnectResponse(True)
+
+  def handle_status_srv(self, req):
+    return NtripClientStatusResponse(
+      0 if rospy.Time.now() - self._last_rtcm_time < rospy.Duration(2.0) else -1
+    )
 
   def subscribe_nmea(self, nmea):
     # Just extract the NMEA from the message, and send it right to the server

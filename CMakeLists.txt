@@ -23,6 +23,7 @@ catkin_python_setup()
 add_service_files(
   FILES
   NtripClientConnect.srv
+  NtripClientStatus.srv
 )
 
 generate_messages(

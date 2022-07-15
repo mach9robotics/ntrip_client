@@ -12,14 +12,20 @@
 #include <ros/ros.h>
 #include <rviz/panel.h>
 
-#include "ntrip_client/NtripClientConnect.h"
-
 class QLineEdit;
 class QLabel;
 class QPushButton;
+class QTimer;
 
 namespace ntrip_client
 {
+
+enum class NtripClientState
+{
+    INVALID,
+    CONNECTED,
+    DISCONNECTED
+};
 
 class NtripPanel : public rviz::Panel
 {
@@ -39,6 +45,7 @@ protected Q_SLOTS:
     // ui
     void connect_clicked();
     void disconnect_clicked();
+    void update_ntrip_status();
 
 protected:
     QLineEdit* m_host_textfield;
@@ -49,9 +56,16 @@ protected:
     QLineEdit* m_ntrip_version_textfield;
     QPushButton* m_connect_button;
     QPushButton* m_disconnect_button;
+    QLabel* m_status_label;
+
+    QTimer* m_status_timer;
 
     ros::NodeHandle m_nh;
     ros::ServiceClient m_connect_service_client;
+    ros::ServiceClient m_ntrip_status_client;
+
+private:
+    void set_state(NtripClientState state);
 };
 
 }
