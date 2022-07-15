@@ -1,0 +1,9 @@
+<library path="lib/libntrip_client">
+    <class name="ntrip_client/NtripPanel"
+           type="ntrip_client::NtripPanel"
+           base_class_type="rviz::Panel">
+        <description>
+            NTRIP Client Panel
+        </description>
+    </class>
+</library>

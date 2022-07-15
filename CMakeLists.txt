@@ -12,6 +12,10 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+find_package(catkin QUIET COMPONENTS
+  rviz
+)
+
 ## Mark python modules for installation
 catkin_python_setup()
 
@@ -36,6 +40,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
+  INCLUDE_DIRS include
   CATKIN_DEPENDS
     rospy
     std_msgs
@@ -43,6 +48,56 @@ catkin_package(
     rtcm_msgs
     nmea_msgs
 )
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+## Set QT parameters
+if(rviz_FOUND)
+    ## This setting causes Qt's "MOC" generation to happen automatically.
+    set(CMAKE_AUTOMOC ON)
+
+    ## This plugin includes Qt widgets, so we must include Qt.
+    ## We'll use the version that rviz used so they are compatible.
+    if(rviz_QT_VERSION VERSION_LESS "5")
+    message(STATUS "Using Qt4 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
+    find_package(Qt4 ${rviz_QT_VERSION} EXACT REQUIRED QtCore QtGui)
+    ## pull in all required include dirs, define QT_LIBRARIES, etc.
+    include(${QT_USE_FILE})
+    else()
+    message(STATUS "Using Qt5 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
+    find_package(Qt5 ${rviz_QT_VERSION} EXACT REQUIRED Core Widgets)
+    ## make target_link_libraries(${QT_LIBRARIES}) pull in all required dependencies
+    set(QT_LIBRARIES Qt5::Widgets)
+    endif()
+
+    ## I prefer the Qt signals and slots to avoid defining "emit", "slots",
+    ## etc because they can conflict with boost signals, so define QT_NO_KEYWORDS here.
+    add_definitions(-DQT_NO_KEYWORDS)
+endif()
+
+if(rviz_FOUND)
+  add_library(${PROJECT_NAME}
+    src/ntrip_panel.cpp
+    include/${PROJECT_NAME}/ntrip_panel.hpp
+  )
+  target_link_libraries(${PROJECT_NAME}
+    ${catkin_LIBRARIES}
+    ${QT_LIBRARIES}
+  )
+  install(TARGETS
+    ${PROJECT_NAME}
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+  install(FILES
+    plugins_description.xml
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  )
+endif()
 
 #############
 ## Install ##

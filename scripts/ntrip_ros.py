@@ -57,7 +57,7 @@ class NTRIPRos:
     self._rtcm_pub = rospy.Publisher('rtcm', RTCM, queue_size=10)
 
     # Setup connect request server
-    self._connect_server = rospy.Service("ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
+    self._connect_server = rospy.Service("/ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
 
     # Initialize the client
     self.init_client(host, port, mountpoint, ntrip_version, username, password)
