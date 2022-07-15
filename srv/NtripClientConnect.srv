@@ -1,5 +1,10 @@
+# Connect if true else disconnect
 bool is_connect
+# Whether to keep connection alive automatically
+bool keep_alive
+# Hostname for NTRIP server
 string host
+# Port number for NTRIP server in string
 string port
 string mountpoint
 string username

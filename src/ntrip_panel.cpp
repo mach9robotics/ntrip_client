@@ -119,6 +119,7 @@ void NtripPanel::connect_clicked()
 {
     ntrip_client::NtripClientConnect srv;
     srv.request.is_connect = true;
+    srv.request.keep_alive = true;
     srv.request.authenticate = true;
     srv.request.host = m_host_textfield->text().toStdString();
     srv.request.port = m_port_textfield->text().toStdString();
