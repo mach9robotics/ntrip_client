@@ -10,7 +10,7 @@ from mavros_msgs.msg import RTCM
 from nmea_msgs.msg import Sentence
 
 from ntrip_client.ntrip_client import NTRIPClient
-
+from ntrip_client.srv import NtripClientConnect, NtripClientConnectResponse
 
 class NTRIPRos:
   def __init__(self):
@@ -56,7 +56,13 @@ class NTRIPRos:
     self._rtcm_timer = None
     self._rtcm_pub = rospy.Publisher('rtcm', RTCM, queue_size=10)
 
+    # Setup connect request server
+    self._connect_server = rospy.Service("ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
+
     # Initialize the client
+    self.init_client(host, port, mountpoint, ntrip_version, username, password)
+
+  def init_client(self, host, port, mountpoint, ntrip_version, username, password):
     self._client = NTRIPClient(
       host=host,
       port=port,
@@ -71,23 +77,16 @@ class NTRIPRos:
     )
 
   def run(self):
-    # Setup a shutdown hook
-    rospy.on_shutdown(self.stop)
-
     # Connect the client
     if not self._client.connect():
       rospy.logerr('Unable to connect to NTRIP server')
-      return 1
+      raise Exception('Unable to connect to NTRIP server')
 
     # Setup our subscriber
     self._nmea_sub = rospy.Subscriber('nmea', Sentence, self.subscribe_nmea, queue_size=10)
 
     # Start the timer that will check for RTCM data
     self._rtcm_timer = rospy.Timer(rospy.Duration(0.1), self.publish_rtcm)
-
-    # Spin until we are shutdown
-    rospy.spin()
-    return 0
 
   def stop(self):
     rospy.loginfo('Stopping RTCM publisher')
@@ -96,6 +95,24 @@ class NTRIPRos:
       self._rtcm_timer.join()
     rospy.loginfo('Disconnecting NTRIP client')
     self._client.disconnect()
+
+  def handle_connect_srv(self, req):
+    print("Handling connect service request")
+    self.stop()
+    try:
+      self.init_client(
+        req.host,
+        int(req.port),
+        req.mountpoint,
+        req.ntrip_version,
+        req.username,
+        req.password
+      )
+      self.run()
+    except Exception as e:
+      rospy.logerr("Exception while connecting: " + str(e))
+      return False
+    return NtripClientConnectResponse(True)
 
   def subscribe_nmea(self, nmea):
     # Just extract the NMEA from the message, and send it right to the server
@@ -111,7 +128,9 @@ class NTRIPRos:
         data=raw_rtcm
       ))
 
-
 if __name__ == '__main__':
   ntrip_ros = NTRIPRos()
-  sys.exit(ntrip_ros.run())
+  rospy.on_shutdown(ntrip_ros.stop)
+  ntrip_ros.run()
+  rospy.spin()
+  exit(0)
