@@ -130,6 +130,9 @@ void NtripPanel::load(const rviz::Config& config)
     if (config.mapGetString("username", &save_val)) m_username_textfield->setText(save_val);
     if (config.mapGetString("password", &save_val)) m_password_textfield->setText(save_val);
     if (config.mapGetString("ntrip_version", &save_val)) m_ntrip_version_textfield->setText(save_val);
+
+    // auto trigger once based on saved connection history
+    connect_clicked();
 }
 
 void NtripPanel::connect_clicked()
