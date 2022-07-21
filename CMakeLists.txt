@@ -108,6 +108,7 @@ endif()
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/ntrip_ros.py
+  scripts/rtcm_conv.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
