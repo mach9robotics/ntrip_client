@@ -4,8 +4,8 @@
   <arg name="port"                   default = "2101" />
   <arg name="mountpoint"             default = "VTRI_RTCM3" />
   <arg name="authenticate"           default = "true" />
-  <arg name="username"               default = "user" />
-  <arg name="password"               default = "pass" />
+  <arg name="username"               default = "" />
+  <arg name="password"               default = "" />
   <arg name="ntrip_version"          default = "" />
   <arg name="debug"                  default = "false" />
 
