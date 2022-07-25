@@ -11,6 +11,7 @@ from nmea_msgs.msg import Sentence
 
 from ntrip_client.ntrip_client import NTRIPClient
 from ntrip_client.srv import NtripClientConnect, NtripClientConnectResponse
+from ntrip_client.srv import NtripClientSettings, NtripClientSettingsResponse
 from ntrip_client.srv import NtripClientStatus, NtripClientStatusResponse
 
 # If no RTCM received for `kKeepAlivePeriod` seconds, connection will be re-opened
@@ -63,6 +64,7 @@ class NTRIPRos:
 
     # Setup connect request server
     self._connect_server = rospy.Service("/ntrip_client_connect", NtripClientConnect, self.handle_connect_srv)
+    self._settings_server = rospy.Service("/ntrip_client_settings", NtripClientSettings, self.handle_settings_srv)
     self._connect_server = rospy.Service("/ntrip_client_status", NtripClientStatus, self.handle_status_srv)
 
     # Initialize the client
@@ -71,6 +73,9 @@ class NTRIPRos:
     # Keep-alive purposes
     self._last_rtcm_time = rospy.Time.now()
     self._last_reconnect_attempt_time = self._last_rtcm_time
+
+    # Settings
+    self._nmea_up = False
 
   def init_client(self, host, port, mountpoint, ntrip_version, username, password):
     self._client = NTRIPClient(
@@ -123,6 +128,12 @@ class NTRIPRos:
         return NtripClientConnectResponse(False)
     return NtripClientConnectResponse(True)
 
+  def handle_settings_srv(self, req):
+    rospy.loginfo("New NTRIP settings:\n" + str(req))
+    self._nmea_up = req.nmea_up
+    self._nmea_sub = rospy.Subscriber(req.nmea_topic, Sentence, self.subscribe_nmea, queue_size=10)
+    return NtripClientSettingsResponse(True)
+
   def handle_status_srv(self, req):
     return NtripClientStatusResponse(
       0 if rospy.Time.now() - self._last_rtcm_time < rospy.Duration(2.0) else -1
@@ -130,7 +141,8 @@ class NTRIPRos:
 
   def subscribe_nmea(self, nmea):
     # Just extract the NMEA from the message, and send it right to the server
-    self._client.send_nmea(nmea.sentence)
+    if self._nmea_up:
+      self._client.send_nmea(nmea.sentence)
 
   def publish_rtcm(self, event):
     # Do not try to get RTCM if not connected

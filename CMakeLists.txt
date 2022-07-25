@@ -23,6 +23,7 @@ catkin_python_setup()
 add_service_files(
   FILES
   NtripClientConnect.srv
+  NtripClientSettings.srv
   NtripClientStatus.srv
 )
 
@@ -48,6 +49,7 @@ catkin_package(
     mavros_msgs
     rtcm_msgs
     nmea_msgs
+    message_runtime
 )
 
 include_directories(
@@ -87,6 +89,10 @@ if(rviz_FOUND)
   target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
     ${QT_LIBRARIES}
+  )
+  add_dependencies(${PROJECT_NAME}
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
   )
   install(TARGETS
     ${PROJECT_NAME}

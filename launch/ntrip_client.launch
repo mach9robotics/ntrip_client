@@ -12,7 +12,7 @@
   <arg name="password"               default = "pass" />
   <arg name="ntrip_version"          default = "" />
   <arg name="debug"                  default = "false" />
-  <arg name="nmea_topic"             default = "/gx5/nmea/sentence" />
+  <arg name="nmea_topic"             default = "/zed_f9p/nmea" />
 
   <!-- Set the log level to debug -->
   <env name="NTRIP_CLIENT_DEBUG" value="$(arg debug)" />
@@ -41,6 +41,6 @@
     <param name="rtcm_frame_id" value="odom" />
 
     <!-- Uncomment the following section and replace "/gx5/nmea/sentence" with the topic you are sending NMEA on if it is not the one we requested -->
-    <!-- <remap from="/ntrip_client/nmea" to="$(arg nmea_topic)" /> -->
+    <remap from="/ntrip_client/nmea" to="$(arg nmea_topic)" />
   </node>
 </launch>
