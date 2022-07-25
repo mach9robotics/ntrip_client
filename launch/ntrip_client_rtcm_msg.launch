@@ -1,23 +1,25 @@
 <?xml version="1.1"?>
 <launch>
-  <arg name="host"                   default = "20.185.11.35" />
+  <arg name="host"                   default = "rtk2go.com" />
   <arg name="port"                   default = "2101" />
-  <arg name="mountpoint"             default = "VTRI_RTCM3" />
-  <arg name="authenticate"           default = "true" />
+  <arg name="mountpoint"             default = "Mach9Pitt" />
+  <arg name="authenticate"           default = "false" />
   <arg name="username"               default = "" />
   <arg name="password"               default = "" />
   <arg name="ntrip_version"          default = "" />
   <arg name="debug"                  default = "false" />
+  <arg name="nmea_topic"             default = "/zed_f9p/nmea" />
 
   <include file="$(find ntrip_client)/launch/ntrip_client.launch">
-    <arg name="host"                 default = "$(arg host)" />
-    <arg name="port"                 default = "$(arg port)" />
-    <arg name="mountpoint"           default = "$(arg mountpoint)" />
-    <arg name="authenticate"         default = "$(arg authenticate)" />
-    <arg name="username"             default = "$(arg username)" />
-    <arg name="password"             default = "$(arg password)" />
-    <arg name="ntrip_version"        default = "$(arg ntrip_version)" />
-    <arg name="debug"                default = "$(arg debug)" />
+    <arg name="host"                 value = "$(arg host)" />
+    <arg name="port"                 value = "$(arg port)" />
+    <arg name="mountpoint"           value = "$(arg mountpoint)" />
+    <arg name="authenticate"         value = "$(arg authenticate)" />
+    <arg name="username"             value = "$(arg username)" />
+    <arg name="password"             value = "$(arg password)" />
+    <arg name="ntrip_version"        value = "$(arg ntrip_version)" />
+    <arg name="debug"                value = "$(arg debug)" />
+    <arg name="nmea_topic"           value = "$(arg nmea_topic)" />
   </include>
 
   <!-- ****************************************************************** -->

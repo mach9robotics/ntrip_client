@@ -1,0 +1,4 @@
+bool nmea_up
+string nmea_topic
+---
+bool success

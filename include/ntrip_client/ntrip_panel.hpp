@@ -16,6 +16,7 @@ class QLineEdit;
 class QLabel;
 class QPushButton;
 class QTimer;
+class QCheckBox;
 
 namespace ntrip_client
 {
@@ -46,6 +47,7 @@ protected Q_SLOTS:
     void connect_clicked();
     void disconnect_clicked();
     void update_ntrip_status();
+    void nmea_up_clicked();
 
 protected:
     QLineEdit* m_host_textfield;
@@ -54,6 +56,7 @@ protected:
     QLineEdit* m_username_textfield;
     QLineEdit* m_password_textfield;
     QLineEdit* m_ntrip_version_textfield;
+    QCheckBox* m_nmea_up_checkbox;
     QPushButton* m_connect_button;
     QPushButton* m_disconnect_button;
     QLabel* m_status_label;
@@ -62,6 +65,7 @@ protected:
 
     ros::NodeHandle m_nh;
     ros::ServiceClient m_connect_service_client;
+    ros::ServiceClient m_settings_client;
     ros::ServiceClient m_ntrip_status_client;
 
 private:
