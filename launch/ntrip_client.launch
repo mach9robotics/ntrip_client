@@ -4,12 +4,12 @@
   <!-- Standalone example launch file for an ntrip client -->
 
   <!-- Declare arguments with default values -->
-  <arg name="host"                   default = "20.185.11.35" />
+  <arg name="host"                   default = "rtk2go.com" />
   <arg name="port"                   default = "2101" />
-  <arg name="mountpoint"             default = "VTRI_RTCM3" />
-  <arg name="authenticate"           default = "true" />
-  <arg name="username"               default = "user" />
-  <arg name="password"               default = "pass" />
+  <arg name="mountpoint"             default = "Mach9Pitt" />
+  <arg name="authenticate"           default = "false" />
+  <arg name="username"               default = "" />
+  <arg name="password"               default = "" />
   <arg name="ntrip_version"          default = "" />
   <arg name="debug"                  default = "false" />
   <arg name="nmea_topic"             default = "/zed_f9p/nmea" />
