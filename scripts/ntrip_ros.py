@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import time
 
 import rospy
 from std_msgs.msg import Header
@@ -71,7 +72,7 @@ class NTRIPRos:
     self.init_client(host, port, mountpoint, ntrip_version, username, password)
 
     # Keep-alive purposes
-    self._last_rtcm_time = rospy.Time.now()
+    self._last_rtcm_time = rospy.Time.from_sec(time.time())
     self._last_reconnect_attempt_time = self._last_rtcm_time
 
     # Settings
@@ -106,7 +107,7 @@ class NTRIPRos:
     rospy.loginfo('Stopping RTCM publisher')
     if self._rtcm_timer:
       self._rtcm_timer.shutdown()
-      self._rtcm_timer.join()
+      # self._rtcm_timer.join()
     rospy.loginfo('Disconnecting NTRIP client')
     self._client.disconnect()
 
@@ -136,7 +137,7 @@ class NTRIPRos:
 
   def handle_status_srv(self, req):
     return NtripClientStatusResponse(
-      0 if rospy.Time.now() - self._last_rtcm_time < rospy.Duration(2.0) else -1
+      0 if rospy.Time.from_sec(time.time()) - self._last_rtcm_time < rospy.Duration(2.0) else -1
     )
 
   def subscribe_nmea(self, nmea):
@@ -151,7 +152,7 @@ class NTRIPRos:
     else:
       raw_rtcms = self._client.recv_rtcm()
 
-    curr_time = rospy.Time.now()
+    curr_time = rospy.Time.from_sec(time.time())
     if len(raw_rtcms) > 0:
       self._last_rtcm_time = curr_time
     if curr_time - self._last_rtcm_time > rospy.Duration(kKeepAlivePeriod):
@@ -177,7 +178,7 @@ class NTRIPRos:
     for raw_rtcm in raw_rtcms:
       self._rtcm_pub.publish(RTCM(
         header=Header(
-          stamp=rospy.Time.now(),
+          stamp=rospy.Time.from_sec(time.time()),
           frame_id=self._rtcm_frame_id
         ),
         data=raw_rtcm
