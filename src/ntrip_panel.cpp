@@ -15,6 +15,7 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QCheckBox>
+#include <QFormLayout>
 
 #include "ntrip_client/ntrip_panel.hpp"
 #include "ntrip_client/NtripClientConnect.h"
@@ -56,25 +57,12 @@ NtripPanel::NtripPanel(QWidget* parent)
 
     set_state(NtripClientState::INVALID);
 
-    QHBoxLayout* host_layout = new QHBoxLayout;
-    host_layout->addWidget(new QLabel(kHostText, this));
-    host_layout->addWidget(m_host_textfield);
-
-    QHBoxLayout* port_layout = new QHBoxLayout;
-    port_layout->addWidget(new QLabel(kPortText, this));
-    port_layout->addWidget(m_port_textfield);
-
-    QHBoxLayout* mountpoint_layout = new QHBoxLayout;
-    mountpoint_layout->addWidget(new QLabel(kMountpointText, this));
-    mountpoint_layout->addWidget(m_mountpoint_textfield);
-
-    QHBoxLayout* username_layout = new QHBoxLayout;
-    username_layout->addWidget(new QLabel(kUsernameText, this));
-    username_layout->addWidget(m_username_textfield);
-
-    QHBoxLayout* password_layout = new QHBoxLayout;
-    password_layout->addWidget(new QLabel(kPasswordText, this));
-    password_layout->addWidget(m_password_textfield);
+    QFormLayout* config_layout = new QFormLayout;
+    config_layout->addRow(kHostText, m_host_textfield);
+    config_layout->addRow(kPortText, m_port_textfield);
+    config_layout->addRow(kMountpointText, m_mountpoint_textfield);
+    config_layout->addRow(kUsernameText, m_username_textfield);
+    config_layout->addRow(kPasswordText, m_password_textfield);
 
     QHBoxLayout* ntrip_version_layout = new QHBoxLayout;
     ntrip_version_layout->addWidget(new QLabel(kNtripVersionText, this));
@@ -87,11 +75,7 @@ NtripPanel::NtripPanel(QWidget* parent)
     buttons_layout->addWidget(m_disconnect_button);
 
     QVBoxLayout* layout = new QVBoxLayout;
-    layout->addLayout(host_layout);
-    layout->addLayout(port_layout);
-    layout->addLayout(mountpoint_layout);
-    layout->addLayout(username_layout);
-    layout->addLayout(password_layout);
+    layout->addLayout(config_layout);
     layout->addLayout(ntrip_version_layout);
     layout->addLayout(buttons_layout);
 
