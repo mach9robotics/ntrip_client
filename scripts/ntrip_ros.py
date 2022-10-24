@@ -95,7 +95,7 @@ class NTRIPRos:
   def run(self):
     # Connect the client
     if not self._client.connect():
-      rospy.logerr('Unable to connect to NTRIP server')
+      rospy.loginfo('Unable to connect to NTRIP server given provided settings')
 
     # Setup our subscriber
     self._nmea_sub = rospy.Subscriber('nmea', Sentence, self.subscribe_nmea, queue_size=10)

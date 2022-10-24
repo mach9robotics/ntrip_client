@@ -67,6 +67,9 @@ class NTRIPClient:
       self._basic_credentials = None
 
   def connect(self):
+    if not self._host:
+      self._loginfo('No host specified, not attempting to connect')
+      return False
     # Connect the socket to the server
     try:
       self._server_socket.connect((self._host, self._port))
