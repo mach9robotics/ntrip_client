@@ -84,9 +84,9 @@ NtripPanel::NtripPanel(QWidget* parent)
     setLayout(layout);
 
     // setup service client
-    m_connect_service_client = m_nh.serviceClient<ntrip_client::NtripClientConnect>("/ntrip_client_connect");
-    m_settings_client = m_nh.serviceClient<ntrip_client::NtripClientSettings>("/ntrip_client_settings");
-    m_ntrip_status_client = m_nh.serviceClient<ntrip_client::NtripClientStatus>("/ntrip_client_status");
+    m_connect_service_client = m_nh.serviceClient<ntrip_client::NtripClientConnect>("/ntrip_client/connect");
+    m_settings_client = m_nh.serviceClient<ntrip_client::NtripClientSettings>("/ntrip_client/settings");
+    m_ntrip_status_client = m_nh.serviceClient<ntrip_client::NtripClientStatus>("/ntrip_client/status");
 
     connect(m_connect_button, SIGNAL(clicked()), this, SLOT(connect_clicked()));
     connect(m_disconnect_button, SIGNAL(clicked()), this, SLOT(disconnect_clicked()));

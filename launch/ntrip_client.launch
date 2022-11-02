@@ -4,7 +4,7 @@
   <!-- Standalone example launch file for an ntrip client -->
 
   <!-- Declare arguments with default values -->
-  <arg name="host"                   default = "20.185.11.35" />
+  <arg name="host"                   default = "" />
   <arg name="port"                   default = "2101" />
   <arg name="mountpoint"             default = "VTRI_RTCM3" />
   <arg name="authenticate"           default = "true" />
@@ -56,7 +56,7 @@
     <param name="rtcm_frame_id" value="odom" />
 
     <!-- Optional parameters that will allow for longer or shorter NMEA messages. Standard max length for NMEA is 82 -->
-    <param name="nmea_max_length" value="82" />
+    <param name="nmea_max_length" value="84" />
     <param name="nmea_min_length" value="3" />
 
     <!-- Use this parameter to change the type of RTCM message published by the node. Defaults to "mavros_msgs", but we also support "rtcm_msgs" -->
