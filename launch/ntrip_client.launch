@@ -16,7 +16,7 @@
   <arg name="key"                    default = "" />
   <arg name="ca_cert"                default = "" />
   <arg name="debug"                  default = "false" />
-  <arg name="rtcm_message_package"   default = "mavros_msgs" />
+  <arg name="rtcm_message_package"   default = "rtcm_msgs" />
   <arg name="nmea_topic"             default = "/zed_f9p/nmea" />
 
   <!-- Set the log level to debug -->
