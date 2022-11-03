@@ -206,7 +206,7 @@ class NTRIPClient:
 
   def send_nmea(self, sentence):
     if not self._connected:
-      self._logwarn('NMEA sent before client was connected, discarding NMEA')
+      # self._logwarn('NMEA sent before client was connected, discarding NMEA')
       return
 
     # Not sure if this is the right thing to do, but python will escape the return characters at the end of the string, so do this manually
@@ -264,6 +264,7 @@ class NTRIPClient:
         self._logerr('Error while reading {} bytes from socket'.format(_CHUNK_SIZE))
         if not self._socket_is_open():
           self._logerr('Socket appears to be closed. Reconnecting')
+          time.sleep(self.reconnect_attempt_wait_seconds)
           self.reconnect()
           return []
         break

@@ -88,13 +88,13 @@ class NTRIPRos:
     # Setup the RTCM publisher
     self._rtcm_timer = None
     self._rtcm_pub = rospy.Publisher('/rtcm', self._rtcm_message_type, queue_size=10)
+    self._nmea_sub = None
 
     # Setup connect request server
     self._connect_server = rospy.Service("/ntrip_client/connect", NtripClientConnect, self.handle_connect_srv)
     self._settings_server = rospy.Service("/ntrip_client/settings", NtripClientSettings, self.handle_settings_srv)
     self._connect_server = rospy.Service("/ntrip_client/status", NtripClientStatus, self.handle_status_srv)
     self._last_rtcm_time = rospy.Time.now()
-
 
     # Initialize the client
     self._client = None
@@ -140,12 +140,15 @@ class NTRIPRos:
       rospy.logerr('Unable to connect to NTRIP server')
 
     # Setup our subscriber
-    self._nmea_sub = rospy.Subscriber('nmea', Sentence, self.subscribe_nmea, queue_size=10)
+    # self._nmea_sub = rospy.Subscriber('nmea', Sentence, self.subscribe_nmea, queue_size=10)
 
     # Start the timer that will check for RTCM data
     self._rtcm_timer = rospy.Timer(rospy.Duration(0.1), self.publish_rtcm)
 
   def stop(self):
+    if self._nmea_sub:
+      self._nmea_sub.unregister()
+      self._nmea_sub = None
     if self._rtcm_timer:
       rospy.loginfo('Stopping RTCM publisher')
       self._rtcm_timer.shutdown()
